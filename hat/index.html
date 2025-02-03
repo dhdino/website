@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+    <title>KIMCH_HAT</title>
+
+    <link rel="stylesheet" href="./css/normalize.css" />
+    <link rel="stylesheet" href="./css/styles.css?v=554105769" />
+
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: url("./images/BG1.jpeg") repeat;
+            background-size: auto;
+            flex-direction: column;
+        }
+
+        .ticker {
+            position: relative;
+            width: 100%;
+            height: 60px;
+            background-color: #FFFAE1;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .ticker .ticker-inner {
+            display: flex;
+            white-space: nowrap;
+            animation: scroll-right 30s linear infinite;
+        }
+
+        .ticker .ticker-text {
+            font-family: 'Nunito', sans-serif;
+            font-size: 36px;
+            font-weight: 700;
+            color: #FF0000;
+            margin-right: 20px;
+        }
+
+        @keyframes scroll-right {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(0%);
+            }
+        }
+
+        .header {
+            position: relative;
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+            background-color: #FFFAE1;
+            padding: 20px 0;
+        }
+
+        .header .title {
+            font-family: 'Nunito', sans-serif;
+            font-size: 48px;
+            font-weight: 900;
+            color: #00ff08;
+            margin: 0;
+        }
+
+        .header .subtitle {
+            font-family: 'Nunito', sans-serif;
+            font-size: 24px;
+            font-weight: 600;
+            color: #000;
+            margin: 0;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 45vw;
+            height: 80vw;
+            max-width: 562px;
+            max-height: 1000px;
+            background: #fff;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid #000;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .button-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .button {
+            width: 100%;
+            max-width: 562px;
+            height: 70px;
+            background-color: #5865F2;
+            border: none;
+            border-radius: 15px;
+            color: #fff;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 900;
+            font-size: 32px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .button:hover {
+            background-color: #4a6fe1;
+        }
+
+        .button.disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .red-circle-button {
+            position: absolute;
+            top: 15px; /* 이미지에서 표시된 동그라미의 위치에 맞춰 조정 */
+            left: 40px; /* 이미지에서 표시된 동그라미의 위치에 맞춰 조정 */
+            width: 100px; /* 빨간색 동그라미 크기 */
+            height: 100px; /* 빨간색 동그라미 크기 */
+            border-radius: 50%;
+            overflow: hidden;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: transparent;
+            border: none;
+        }
+
+        .red-circle-button img {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="ticker">
+        <div class="ticker-inner" id="tickerInner">
+            <!-- 텍스트는 JavaScript에서 반복적으로 채움 -->
+        </div>
+    </div>
+
+    <div class="header">
+        <h1 class="title">$DH</h1>
+        <p class="subtitle">ARE U WANT TOUCHING SOME KIMCH HAT?</p>
+        <a href="https://dhnft.com" target="_blank" class="red-circle-button">
+            <img src="./images/다운로드.png" alt="Button Image" />
+        </a>
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <div class="button-container">
+        <button id="action-button" class="button">ADD IMAGE</button>
+        <input type="file" id="upload" accept="image/*" style="display: none;">
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.2.4/fabric.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const canvasContainer = document.querySelector('.canvas-container');
+            const canvasWidth = canvasContainer.offsetWidth;
+            const canvasHeight = canvasContainer.offsetHeight;
+
+            const canvas = new fabric.Canvas('canvas', {
+                width: canvasWidth,
+                height: canvasHeight,
+                backgroundColor: "#FFFFFF",
+                selection: true,
+                preserveObjectStacking: true
+            });
+
+            let hatImage;
+            let uploadedImage;
+
+            const addHatImage = () => {
+                fabric.Image.fromURL("./images/hat.png", (img) => {
+                    img.set({
+                        left: canvas.width / 2,
+                        top: canvas.height / 2,
+                        originX: "center",
+                        originY: "center",
+                        scaleX: 0.5,
+                        scaleY: 0.5,
+                        selectable: true,
+                        hasControls: true,
+                        hasBorders: true
+                    });
+
+                    hatImage = img;
+                    canvas.add(hatImage);
+                    canvas.setActiveObject(hatImage);
+                });
+            };
+
+            addHatImage();
+
+            const actionButton = document.getElementById("action-button");
+            const uploadInput = document.getElementById("upload");
+
+            actionButton.addEventListener("click", () => {
+                if (actionButton.textContent === "ADD IMAGE") {
+                    uploadInput.click();
+                } else if (actionButton.textContent === "SAVE IMAGE") {
+                    const dataURL = canvas.toDataURL({
+                        format: "png",
+                        quality: 1,
+                        left: 0,
+                        top: 0,
+                        width: canvas.getWidth(),
+                        height: canvas.getHeight()
+                    });
+                    const link = document.createElement("a");
+                    link.href = dataURL;
+                    link.download = "canvas-image.png";
+                    link.click();
+                }
+            });
+
+            uploadInput.addEventListener("change", (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.src = e.target.result;
+                        img.onload = () => {
+                            fabric.Image.fromURL(img.src, (img) => {
+                                const scaleX = canvas.width / img.width;
+                                const scaleY = canvas.height / img.height;
+                                const scale = Math.min(scaleX, scaleY);
+
+                                img.set({
+                                    left: canvas.width / 2,
+                                    top: canvas.height / 2,
+                                    originX: 'center',
+                                    originY: 'center',
+                                    scaleX: scale,
+                                    scaleY: scale,
+                                    selectable: false
+                                });
+
+                                if (uploadedImage) {
+                                    canvas.remove(uploadedImage);
+                                }
+
+                                uploadedImage = img;
+                                canvas.add(uploadedImage);
+                                canvas.sendToBack(uploadedImage);
+                            });
+                        };
+                    };
+                    reader.readAsDataURL(file);
+                    actionButton.textContent = "SAVE IMAGE"; // Change button text after adding image
+                }
+            });
+
+            const tickerInner = document.getElementById('tickerInner');
+
+            const addText = () => {
+                const text = document.createElement('span');
+                text.classList.add('ticker-text');
+                text.innerText = 'BUY $DH';
+                tickerInner.appendChild(text);
+            };
+
+            const fillTextContinuously = () => {
+                while (tickerInner.scrollWidth < window.innerWidth * 2) {
+                    addText();
+                }
+            };
+
+            fillTextContinuously();
+
+            setInterval(() => {
+                fillTextContinuously();
+            }, 1000); // 지속적으로 텍스트 추가
+        });
+    </script>
+</body>
+
+</html>
